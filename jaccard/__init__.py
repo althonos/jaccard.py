@@ -247,9 +247,9 @@ def probabilistic_similarity_pairwise(X, Y=None):
 
     Parameters
     ----------
-    X : (M, k) array_like of floats
+    X : (M, d) array_like of floats
         Input matrix.
-    Y : (N, k) array_like of floats
+    Y : (N, d) array_like of floats
         Input matrix.
 
     Returns
@@ -291,3 +291,83 @@ def probabilistic_similarity_pairwise(X, Y=None):
 
     tt = X @ Y.transpose(-1, -2)
     return tt / (X.sum(axis=-1).reshape(-1, 1) - tt + Y.sum(axis=-1).reshape(1, -1))
+
+
+def centered_similarity(u, v, w=None, *, pu=None, pv=None):
+    r"""
+    Compute the centered Jaccard similarity between two boolean vectors.
+
+    Parameters
+    ----------
+    u : (*, N) array_like of floats
+        Input vectors.
+    v : (*, N) array_like of floats
+        Input vectors.
+    w : (*, N) array_like of floats, optional
+        Weights for each pair of :math:`(u_k, v_k)`.  Default is ``None``,
+        which gives each pair a weight of ``1.0``.
+    
+    References
+    ----------
+    .. [1] Chung, N. C., Miasojedow, B., Startek, M. & Gambin, A. (2019) 
+           "Jaccard/Tanimoto similarity test and estimation methods for 
+           biological presence-absence data". BMC Bioinformatics 20, 644.
+
+    Examples
+    --------
+    >>> import jaccard
+    >>> from numpy import array
+
+    Zero vectors are supported but the probabilities for each vector need to 
+    be given *a priori*:
+
+    >>> jaccard.centered_similarity(array([0, 0]), array([0, 0]), pu=0.5, pv=0.5)
+    0.0
+
+    Identical vectors may have a centered similarity lower than one since
+    they account for the probability of the events 
+    (here :math:`P(u) = P(v) = \frac13`):
+
+    >>> jaccard.centered_similarity(array([1, 0, 0]), array([1, 0, 0]))
+    0.8
+
+    Negatively correlated samples have a negative similarity:
+
+    >>> jaccard.centered_similarity(array([1, 0, 0, 1]), array([0, 1, 1, 0]))
+    -0.3333...
+
+    """
+    if u.ndim != v.ndim:
+        raise ValueError("shape mismatch")
+    elif u.shape[-1] != v.shape[-1]:
+        raise ValueError("dimension mismatch")
+    
+    nzu = u != 0
+    nzv = v != 0
+
+    if pu is None:
+        pu = nzu.sum(axis=-1) / nzu.shape[-1]
+    if pv is None:
+        pv = nzv.sum(axis=-1) / nzv.shape[-1]
+    if pu == 0 or pv == 0:
+        raise ValueError("zero probabilities")
+
+    inter = nzu & nzv
+    union = nzu | nzv
+
+    if w is not None:
+        inter = w * inter
+        union = w * union
+
+    a = inter.sum(axis=-1)
+    b = union.sum(axis=-1)
+    
+    E = (pu * pv) / (pu + pv - pu*pv)
+    
+    if len(u.shape) > 1:
+        T = a / b.clip(min=1)
+        T[b == 0] = E
+    else:
+        T = E if b == 0 else a / b
+
+    return T - E
