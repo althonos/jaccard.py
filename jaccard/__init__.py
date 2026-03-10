@@ -1,5 +1,5 @@
 __author__ = "Martin Larralde <martin.larralde@embl.de>"
-__version__ = "0.1.0"
+__version__ = "0.1.0-dev.1"
 __license__ = "MIT"
 
 # Small addition to the docstring: we want to show a link redirecting to the
@@ -306,11 +306,11 @@ def centered_similarity(u, v, w=None, *, pu=None, pv=None):
     w : (*, N) array_like of floats, optional
         Weights for each pair of :math:`(u_k, v_k)`.  Default is ``None``,
         which gives each pair a weight of ``1.0``.
-    
+
     References
     ----------
-    .. [1] Chung, N. C., Miasojedow, B., Startek, M. & Gambin, A. (2019) 
-           "Jaccard/Tanimoto similarity test and estimation methods for 
+    .. [1] Chung, N. C., Miasojedow, B., Startek, M. & Gambin, A. (2019)
+           "Jaccard/Tanimoto similarity test and estimation methods for
            biological presence-absence data". BMC Bioinformatics 20, 644.
 
     Examples
@@ -318,14 +318,14 @@ def centered_similarity(u, v, w=None, *, pu=None, pv=None):
     >>> import jaccard
     >>> from numpy import array
 
-    Zero vectors are supported but the probabilities for each vector need to 
+    Zero vectors are supported but the probabilities for each vector need to
     be given *a priori*:
 
     >>> jaccard.centered_similarity(array([0, 0]), array([0, 0]), pu=0.5, pv=0.5)
     0.0
 
     Identical vectors may have a centered similarity lower than one since
-    they account for the probability of the events 
+    they account for the probability of the events
     (here :math:`P(u) = P(v) = \frac13`):
 
     >>> jaccard.centered_similarity(array([1, 0, 0]), array([1, 0, 0]))
@@ -341,7 +341,7 @@ def centered_similarity(u, v, w=None, *, pu=None, pv=None):
         raise ValueError("shape mismatch")
     elif u.shape[-1] != v.shape[-1]:
         raise ValueError("dimension mismatch")
-    
+
     nzu = u != 0
     nzv = v != 0
 
@@ -361,9 +361,9 @@ def centered_similarity(u, v, w=None, *, pu=None, pv=None):
 
     a = inter.sum(axis=-1)
     b = union.sum(axis=-1)
-    
+
     E = (pu * pv) / (pu + pv - pu*pv)
-    
+
     if len(u.shape) > 1:
         T = a / b.clip(min=1)
         T[b == 0] = E
@@ -371,3 +371,64 @@ def centered_similarity(u, v, w=None, *, pu=None, pv=None):
         T = E if b == 0 else a / b
 
     return T - E
+
+
+def collision_probability(u, v, *, dtype=None):
+    r"""
+    Compute the Jaccard collision probability from two positive vectors.
+
+    The Jaccard index is defined for boolean vectors which indicate set
+    membership. Several generalizations have been proposed to extend it
+    to arbitrary vectors. One of such generalization was
+    proposed by Moulton & Jiang, which treats its input as a
+    probability distribution. [1]_
+
+    The following formulation expresses the Jaccard index between
+    two positive vectors as a collision probability through MinHashing:
+
+    .. math::
+
+       J_{\mathcal{P}}(u, v) := \sum_{i | u_i, v_i > 0 }
+            {\frac{1}{\sum_{j}{ max(\frac{u_j}{u_i}, \frac{v_j}{v_i}) }}}
+
+    For discrete uniform distributions, the collision probability is equal
+    to the weighted Jaccard index.
+
+    References
+    ----------
+    .. [1] Moulton, R., & Jiang, Y. (2018)
+           "Maximally Consistent Sampling and the Jaccard Index of Probability
+           Distributions". ICDM Workshop on High Dimensional Data Mining.
+
+    Examples
+    --------
+    >>> import jaccard
+    >>> from numpy import array
+
+    Collision probability between discrete vectors is equal to their
+    Jaccard similarity:
+
+    >>> jaccard.collision_probability(array([1, 0, 0]), array([1, 1, 0]))
+    0.5
+
+    Collision probability is scale invariant, i.e. 
+    :math:`J_{\mathcal{P}}(\alpha u, v) = J_{\mathcal{P}}(u, v)` :
+
+    >>> jaccard.collision_probability(array([1, 0, 0]), array([2, 2, 0]))
+    0.5
+
+    """
+    if u.ndim != v.ndim:
+        raise ValueError("shape mismatch")
+    elif u.shape[-1] != v.shape[-1]:
+        raise ValueError("dimension mismatch")
+    elif u.ndim > 1:
+        raise ValueError("data can only be one dimensional")
+
+    # iterate (fixme! O(nlog(n))!)
+    out = 0.0
+    for i in range(u.shape[-1]):
+        if u[i] == 0 or v[i] == 0:
+            continue
+        out += 1 / (u / u[i]).clip(min=v / v[i]).sum()
+    return out
