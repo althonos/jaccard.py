@@ -37,15 +37,17 @@ def _load_tests_from_module(tests, module, globs, setUp=None, tearDown=None):
 def load_tests(loader, tests, ignore):
     """`load_test` function used by unittest to find the doctests."""
     _current_cwd = os.getcwd()
+    _options =  numpy.get_printoptions()
 
     def setUp(self):
         warnings.simplefilter("ignore")
-        numpy.set_printoptions(legacy="1.25")
+        if numpy.__version__[0] != '1':
+            numpy.set_printoptions(legacy="1.25")
         # os.chdir(os.path.realpath(os.path.join(__file__, os.path.pardir, "data")))
 
     def tearDown(self):
         # os.chdir(_current_cwd)
-        numpy.set_printoptions(legacy=False)
+        numpy.set_printoptions(**_options)
         warnings.simplefilter(warnings.defaultaction)
 
     # doctests are not compatible with `green`, so we may want to bail out
