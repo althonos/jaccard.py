@@ -1,5 +1,5 @@
 __author__ = "Martin Larralde <martin.larralde@embl.de>"
-__version__ = "0.1.0-dev.1"
+__version__ = "0.1.0"
 __license__ = "MIT"
 
 # Small addition to the docstring: we want to show a link redirecting to the
