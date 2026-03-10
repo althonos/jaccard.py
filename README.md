@@ -29,17 +29,20 @@ Agnostic interface using duck-typing: all functions should be available for
 [NumPy] arrays, [MLX] arrays, or [PyTorch] tensors, unless noted otherwise.
 
 [NumPy]: https://numpy.org
-[MLX]: 
+[MLX]: https://ml-explore.github.io/mlx/
+[PyTorch]: https://pytorch.org/
 
 The following functions are implemented:
 
 - Jaccard similarity[\[1\]](#ref1): measure similarity between boolean vectors,
   similar to `scipy.spatial.distance.jaccard`.
 - probabilistic Jaccard similarity[\[2\]](#ref2): measure similarity between
-  probability vectors.
+  probability vectors while quantifying uncertainty.
 - centered Jaccard similarity and Jaccard testing[\[3\]](#ref3): identify
-  non-random co-occurences between samples.
-
+  non-random co-occurences between samples with robust statistical testing.
+- collision probability Jaccard index [\[4\]](#ref4): measure similarity between 
+  positive indices, using a metric that is scale invariant, sensitive to
+  changes in support, and computable as a collision probability.
 
 ## 🔧 Installing
 
@@ -55,7 +58,7 @@ package:
 $ conda install -c bioconda jaccard
 ``` -->
 
-## 📖 Documentation
+<!-- ## 📖 Documentation
 
 A complete [API reference](https://jaccard.readthedocs.io/en/stable/api/index.html)
 can be found in the [online documentation](https://jaccard.readthedocs.io/),
@@ -63,7 +66,7 @@ or directly from the command line using
 [`pydoc`](https://docs.python.org/3/library/pydoc.html):
 ```console
 $ pydoc jaccard
-```
+``` -->
 
 <!-- 
 ## 💡 Example
@@ -96,4 +99,5 @@ during his PhD project at the [Leiden University Medical Center](https://www.lum
 
 - <a id="ref1">\[1\]</a> Jaccard, P. "Étude comparative de la distribution florale dans une portion des Alpes et du Jura." Bulletin de la Société Vaudoise des Sciences Naturelles 37, 547–579 (1901). [doi:10.1111/j.1469-8137.1912.tb05611.x](https://doi.org/10.1111/j.1469-8137.1912.tb05611.x)
 - <a id="ref2">\[2\]</a> Martire, I., Da Silva, P. N., Plastino, A., Fabris, F. & Freitas, A. A. "A novel probabilistic Jaccard distance measure for classification of sparse and uncertain data". Proceedings of the 5th Symposium on Knowledge Discovery, Mining and Learning, 81-88 (2017).
-- <a id="ref3">\[3\]</a> Chung, N. C., Miasojedow, B., Startek, M. & Gambin, A. Jaccard/Tanimoto similarity test and estimation methods for biological presence-absence data. BMC Bioinformatics 20, 644 (2019). [doi:10.1186/s12859-019-3118-5](https://doi.org/10.1186/s12859-019-3118-5)
+- <a id="ref3">\[3\]</a> Chung, N. C., Miasojedow, B., Startek, M. & Gambin, A. "Jaccard/Tanimoto similarity test and estimation methods for biological presence-absence data". BMC Bioinformatics 20, 644 (2019). [doi:10.1186/s12859-019-3118-5](https://doi.org/10.1186/s12859-019-3118-5)
+- <a id="ref4">\[4\]</a> 1. Moulton, R. & Jiang, Y. "Maximally Consistent Sampling and the Jaccard Index of Probability Distributions". in 2018 IEEE International Conference on Data Mining (ICDM) 347–356 (2018). [doi:10.1109/ICDM.2018.00050](https://doi.org/10.1109/ICDM.2018.00050).
