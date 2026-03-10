@@ -245,6 +245,27 @@ def probabilistic_similarity_pairwise(X, Y=None):
     r"""
     Compute the probabilistic Jaccard similarity between pairs of vectors.
 
+    A fast approach for computing pairwise probabilistic similarity
+    between two matrices of observations :math:`A \in \mathbb{B}^{m \times n}`
+    can be computed with:
+
+    .. math::
+
+        s_{i,j} = b_{i,j} / c_{i,j}
+
+    where:
+
+    .. math::
+
+        b_{i, j} = \|X_i \cap X_j\| = \sum_{k}{a_{k,i} a_{k,j}}
+    
+    so :math:`B = A^T A`, and:
+
+    .. math::
+
+        c_{i, j} = \|X_i \cup X_j\| = \|X_i\| + \|X_j\| - \|X_i \cap X_j\| 
+                 = \sum_{k}{a_{k,i}} + \sum_{k}{a_{k,j}} - b_{i,j}
+
     Parameters
     ----------
     X : (M, d) array_like of floats
@@ -264,7 +285,12 @@ def probabilistic_similarity_pairwise(X, Y=None):
            Freitas, A. A. (2017) "A novel probabilistic Jaccard distance
            measure for classification of sparse and uncertain data."
            Proceedings of the 5th Symposium on Knowledge Discovery, Mining
-           and Learning (KDMiLe): 81-88.
+           and Learning (KDMiLe) 81-88.
+    .. [2] Besta, M., Kanakagiri, R., Mustafa, H., Karasikov, M., Rätsch, G.
+           & Hoefler, T. (2020). "Communication-Efficient Jaccard similarity 
+           for High-Performance Distributed Genome Comparisons". *in* 2020 
+           IEEE International Parallel and Distributed Processing Symposium 
+           (IPDPS) 112-1132. :doi:`10.1109/IPDPS47924.2020.00118`.
 
     Examples
     --------
